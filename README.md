@@ -89,3 +89,4 @@ feat: add user profile import from CSV
 4. When `development` is stable, merge it into `main` for production release.
 
 For more details, see [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
+For architecture and database schema details, see [ARCHITECTURE.md](ARCHITECTURE.md).
