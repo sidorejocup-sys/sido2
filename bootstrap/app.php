@@ -12,7 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Register custom rate limiting middleware
+        $middleware->alias([
+            'login.rate.limit' => \App\Http\Middleware\LoginRateLimitMiddleware::class,
+            'api.rate.limit' => \App\Http\Middleware\ApiRateLimitMiddleware::class,
+        ]);
+
+        // Ensure CSRF protection on web routes
+        $middleware->web(\Illuminate\Session\Middleware\EncryptCookies::class);
+        $middleware->web(\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class);
+        $middleware->web(\Illuminate\Session\Middleware\StartSession::class);
+        $middleware->web(\Illuminate\View\Middleware\ShareErrorsFromSession::class);
+        $middleware->web(\App\Http\Middleware\VerifyCsrfToken::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
