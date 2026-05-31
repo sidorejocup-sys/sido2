@@ -20,12 +20,14 @@ class AdminDashboardController extends Controller
         $this->authorize('admin');
 
         $totalSppt = Sppt::count();
+        $totalSubjekPajak = \App\Models\SubjekPajak::count();
         $totalRevenue = Pembayaran::sum('jumlah_bayar');
         $pendingPayments = Sppt::where('status_bayar', 'piutang')->count();
         $approvalPending = Sppt::where('status_bayar', 'proses_pengajuan')->count();
 
         return view('admin.dashboard', [
             'totalSppt' => $totalSppt,
+            'totalSubjekPajak' => $totalSubjekPajak,
             'totalRevenue' => $totalRevenue,
             'pendingPayments' => $pendingPayments,
             'approvalPending' => $approvalPending,

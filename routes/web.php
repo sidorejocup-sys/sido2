@@ -53,11 +53,14 @@ Route::middleware('auth')->group(function () {
             ->name('admin.dashboard');
         Route::post('/admin/import', [AdminDashboardController::class, 'import'])
             ->name('admin.import');
-        Route::post('/admin/export', [AdminDashboardController::class, 'export'])
+        Route::get('/admin/export', [AdminDashboardController::class, 'export'])
             ->name('admin.export');
         Route::post('/admin/approve-payment/{pembayaran}', [AdminDashboardController::class, 'approvePayment'])
             ->name('admin.approve-payment');
     });
+
+    Route::get('/api/search', [\App\Http\Controllers\SearchController::class, 'search'])
+        ->name('api.search');
 
     /**
      * Village Dashboard (Kades, Kasun RW, RT - View and Filter)
