@@ -1,0 +1,82 @@
+# Laravel
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/.phpunit.cache
+.phpunit.result.cache
+.phpactor.json
+/_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+.env
+.env.*
+!.env.example
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.vscode
+/.zed
+/auth.json
+.DS_Store
+*.log
+
+# Vite / Node
+/.vite
+/node_modules/.vite
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+/public/build
+/public/hot
+/public/storage
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+
+# IDE / tooling
+/.idea
+/.vscode
+/.phpactor
+/.phpstorm.meta.php
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Laravel environment and database config files
+.env
+.env.*
+!.env.example
+.env.postgres
+.env.postgres.local
+.env.pgsql
+.env.pgsql.local
+.env.database
+.env.database.local
+.env.*.backup
+.env.*.production
+.env.*.staging
+.env.*.testing
+
+# Composer
+/vendor
+
+# Laravel storage
+/storage/*.key
+/storage/pail
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
