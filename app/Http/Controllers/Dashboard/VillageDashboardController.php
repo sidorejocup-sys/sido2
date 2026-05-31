@@ -39,10 +39,34 @@ class VillageDashboardController extends Controller
         $paidSppt = (clone $spptQuery)->where('status_bayar', 'lunas')->count();
         $pendingSppt = (clone $spptQuery)->where('status_bayar', 'piutang')->count();
 
+        $statistics = [
+            'total_pajak_terhutang' => $spptQuery->sum('pajak_terhutang'),
+            'total_pembayaran' => Pembayaran::whereHas('sppt', function ($q) use ($rt, $rw) {
+                if ($rt) {
+                    $q->whereHas('objekPajak.subjekPajak', function ($q2) use ($rt) {
+                        $q2->where('RT', $rt);
+                    });
+                } elseif ($rw) {
+                    $q->whereHas('objekPajak.subjekPajak', function ($q2) use ($rw) {
+                        $q2->where('RW', $rw);
+                    });
+                }
+            })->sum('jumlah_bayar'),
+            'collection_rate' => 0,
+        ];
+
+        if ($statistics['total_pajak_terhutang'] > 0) {
+            $statistics['collection_rate'] = round(
+                ($statistics['total_pembayaran'] / $statistics['total_pajak_terhutang']) * 100,
+                2
+            );
+        }
+
         return view('village.dashboard', [
             'totalSppt' => $totalSppt,
             'paidSppt' => $paidSppt,
             'pendingSppt' => $pendingSppt,
+            'statistics' => $statistics,
             'userRole' => auth()->user()->role,
         ]);
     }

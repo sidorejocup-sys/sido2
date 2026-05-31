@@ -94,7 +94,7 @@ h6 {
 }
 
 .btn-cyber-primary {
-    @apply btn-cyber;
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2;
     background: linear-gradient(135deg, #9d4edd, #c77dff);
     color: #0a0a14;
     border: none;
@@ -120,7 +120,7 @@ h6 {
 
 /* Dropdown Styles */
 .select-cyber {
-    @apply input-cyber appearance-none cursor-pointer pr-10;
+    @apply w-full px-4 py-3 rounded-lg bg-cyber-gray/50 border border-white/10 text-cyber-light placeholder-gray-500 appearance-none cursor-pointer pr-10;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%23c77dff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
@@ -142,7 +142,9 @@ h6 {
 
 /* Analytics Card */
 .analytics-card {
-    @apply glass-panel p-6;
+    @apply bg-white/5 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden p-6;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .analytics-title {
@@ -189,7 +191,9 @@ h6 {
 
 /* Search Bar Styles */
 .search-bar {
-    @apply glass-panel px-4 py-3 flex items-center gap-3 glow-border-cyan;
+    @apply bg-white/5 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden px-4 py-3 flex items-center gap-3;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-bar input {
@@ -276,7 +280,9 @@ h6 {
 
 /* Sidebar & Navigation */
 .sidebar {
-    @apply glass-panel h-screen sticky top-0 border-r border-white/10;
+    @apply bg-white/5 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden h-screen sticky top-0 border-r border-white/10;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-link {

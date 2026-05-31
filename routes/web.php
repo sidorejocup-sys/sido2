@@ -85,8 +85,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:kades,kasun_rw,rt')->group(function () {
         Route::get('/village/dashboard', [VillageDashboardController::class, 'index'])
             ->name('village.dashboard');
-        Route::get('/village/payments', [VillageDashboardController::class, 'payments'])
-            ->name('village.payments');
         Route::get('/village/statistics', [VillageDashboardController::class, 'statistics'])
             ->name('village.statistics');
     });
