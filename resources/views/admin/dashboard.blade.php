@@ -125,26 +125,80 @@
             </div>
         </div>
 
+        <div id="bulk-toast" class="fixed right-6 top-24 z-50 hidden max-w-sm rounded-xl border border-white/10 bg-cyber-darker p-4 shadow-2xl shadow-black/40 text-sm text-gray-100">
+            <div id="bulk-toast-message" class="mb-2"></div>
+            <div id="bulk-toast-close" class="text-xs text-gray-400 cursor-pointer hover:text-white">Dismiss</div>
+        </div>
+
+        <div id="bulk-progress" class="glass-panel p-4 mb-6 hidden">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p id="bulk-progress-label" class="text-sm text-gray-300 font-semibold">Preparing background import</p>
+                    <p id="bulk-progress-message" class="text-xs text-gray-500 mt-1">Waiting for worker...</p>
+                </div>
+                <div id="bulk-progress-percent" class="text-sm text-cyber-green">0%</div>
+            </div>
+            <div class="w-full rounded-full bg-white/10 h-3 overflow-hidden">
+                <div id="bulk-progress-fill" class="h-full rounded-full bg-cyber-green transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div id="bulk-progress-actions" class="mt-3 hidden">
+                <a id="bulk-download-link" href="#" class="btn-cyber w-full justify-center">Download Result</a>
+            </div>
+        </div>
+
         <div class="analytics-card glow-border-purple">
             <h3 class="text-lg font-bold text-cyber-light mb-4">Quick Actions</h3>
-            <div class="space-y-2">
-                <form action="{{ route('admin.import') }}" method="POST" enctype="multipart/form-data" class="space-y-2">
+            <div class="space-y-4">
+                <form id="import-form" action="{{ route('admin.import') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
                     @csrf
+                    <div class="grid gap-3 md:grid-cols-2">
+                        <label class="block text-sm text-gray-400">
+                            Import module
+                            <select name="module" id="import-module" class="select-cyber mt-2" required>
+                                <option value="subjek_pajak">Subjek Pajak</option>
+                                <option value="objek_pajak">Objek Pajak</option>
+                                <option value="sppt">SPPT</option>
+                            </select>
+                        </label>
+                        <div class="space-y-2">
+                            <p class="text-sm text-gray-400">Download template</p>
+                            <a id="template-link" href="{{ route('admin.import.template', ['module' => 'subjek_pajak']) }}" class="btn-cyber w-full justify-center">Template for Subjek Pajak</a>
+                        </div>
+                    </div>
                     <label class="block text-sm text-gray-400">Upload file</label>
                     <input type="file" name="file" class="input-cyber" accept=".csv,.xlsx" required>
                     <button type="submit" class="btn-cyber-primary w-full justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Import Data
+                        Start Import
                     </button>
                 </form>
-                <form action="{{ route('admin.export') }}" method="GET">
+
+                <form id="export-form" action="{{ route('admin.export.submit') }}" method="POST" class="space-y-3">
+                    @csrf
+                    <div class="grid gap-3 md:grid-cols-2">
+                        <label class="block text-sm text-gray-400">
+                            Export module
+                            <select name="module" class="select-cyber mt-2" required>
+                                <option value="subjek_pajak">Subjek Pajak</option>
+                                <option value="objek_pajak">Objek Pajak</option>
+                                <option value="sppt">SPPT</option>
+                            </select>
+                        </label>
+                        <label class="block text-sm text-gray-400">
+                            Format
+                            <select name="format" class="select-cyber mt-2" required>
+                                <option value="xlsx">Excel (.xlsx)</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </label>
+                    </div>
                     <button type="submit" class="btn-cyber w-full justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Export Report
+                        Queue Export
                     </button>
                 </form>
             </div>
@@ -230,6 +284,145 @@
                 document.getElementById('search-results').classList.remove('hidden');
             });
     });
-</script>
-@endpush
-@endsection
+
+        const toastBox = document.getElementById('bulk-toast');
+        const toastMessage = document.getElementById('bulk-toast-message');
+        const toastClose = document.getElementById('bulk-toast-close');
+        const progressBox = document.getElementById('bulk-progress');
+        const progressLabel = document.getElementById('bulk-progress-label');
+        const progressMessage = document.getElementById('bulk-progress-message');
+        const progressPercent = document.getElementById('bulk-progress-percent');
+        const progressFill = document.getElementById('bulk-progress-fill');
+        const downloadActions = document.getElementById('bulk-progress-actions');
+        const downloadLink = document.getElementById('bulk-download-link');
+        const importModuleSelect = document.getElementById('import-module');
+        const templateLink = document.getElementById('template-link');
+
+        toastClose.addEventListener('click', () => {
+            toastBox.classList.add('hidden');
+        });
+
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toastBox.classList.remove('hidden');
+            toastBox.classList.toggle('border-cyber-green', type === 'success');
+            toastBox.classList.toggle('border-cyber-pink', type === 'error');
+            toastBox.classList.toggle('bg-cyber-dark', type === 'error');
+        }
+
+        function startProgress(label, message) {
+            progressBox.classList.remove('hidden');
+            downloadActions.classList.add('hidden');
+            progressLabel.textContent = label;
+            progressMessage.textContent = message;
+            progressPercent.textContent = '0%';
+            progressFill.style.width = '0%';
+        }
+
+        function updateProgress(percent, message) {
+            progressPercent.textContent = `${percent}%`;
+            progressFill.style.width = `${percent}%`;
+            if (message) {
+                progressMessage.textContent = message;
+            }
+        }
+
+        function finishProgress(message, success = true) {
+            progressMessage.textContent = message;
+            progressFill.style.width = '100%';
+            progressPercent.textContent = '100%';
+            showToast(message, success ? 'success' : 'error');
+        }
+
+        function pollStatus(url, onUpdate) {
+            return new Promise((resolve, reject) => {
+                const interval = setInterval(async () => {
+                    try {
+                        const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                        const data = await response.json();
+                        onUpdate(data);
+
+                        if (data.status === 'completed') {
+                            clearInterval(interval);
+                            resolve(data);
+                        }
+
+                        if (data.status === 'failed') {
+                            clearInterval(interval);
+                            reject(data);
+                        }
+                    } catch (error) {
+                        clearInterval(interval);
+                        reject({ message: 'Unable to poll status endpoint.' });
+                    }
+                }, 1500);
+            });
+        }
+
+        importModuleSelect.addEventListener('change', function () {
+            templateLink.href = `/admin/import-template/${this.value}`;
+            templateLink.textContent = `Template for ${this.options[this.selectedIndex].text}`;
+        });
+
+        document.getElementById('import-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            startProgress('Queued import', 'Submitting file to worker queue...');
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': window.csrfToken },
+                    body: formData,
+                });
+
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Import request failed.');
+                }
+
+                const jobId = payload.job_id;
+                await pollStatus(`/admin/import-status/${jobId}`, (data) => {
+                    updateProgress(data.progress, data.message);
+                });
+
+                finishProgress('Import finished successfully.');
+            } catch (error) {
+                finishProgress(error.message || 'Import failed.', false);
+            }
+        });
+
+        document.getElementById('export-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            startProgress('Queued export', 'Sending export job to queue...');
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': window.csrfToken },
+                    body: formData,
+                });
+
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Export request failed.');
+                }
+
+                const jobId = payload.job_id;
+                const result = await pollStatus(`/admin/export-status/${jobId}`, (data) => {
+                    updateProgress(data.progress, data.message);
+                });
+
+                if (result.download_path) {
+                    downloadLink.href = `/admin/export-download/${jobId}`;
+                    downloadActions.classList.remove('hidden');
+                    showToast('Export ready. Click to download.', 'success');
+                    downloadLink.click();
+                } else {
+                    finishProgress('Export completed, but download link is unavailable.', false);
+                }
+            } catch (error) {
+                finishProgress(error.message || 'Export failed.', false);
+            }
+        });

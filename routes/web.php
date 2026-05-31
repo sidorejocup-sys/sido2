@@ -53,8 +53,18 @@ Route::middleware('auth')->group(function () {
             ->name('admin.dashboard');
         Route::post('/admin/import', [AdminDashboardController::class, 'import'])
             ->name('admin.import');
-        Route::get('/admin/export', [AdminDashboardController::class, 'export'])
+        Route::get('/admin/import-status/{jobId}', [AdminDashboardController::class, 'importStatus'])
+            ->name('admin.import.status');
+        Route::get('/admin/import-template/{module}', [AdminDashboardController::class, 'downloadTemplate'])
+            ->name('admin.import.template');
+        Route::get('/admin/export', [AdminDashboardController::class, 'exportPage'])
             ->name('admin.export');
+        Route::post('/admin/export', [AdminDashboardController::class, 'export'])
+            ->name('admin.export.submit');
+        Route::get('/admin/export-status/{jobId}', [AdminDashboardController::class, 'exportStatus'])
+            ->name('admin.export.status');
+        Route::get('/admin/export-download/{jobId}', [AdminDashboardController::class, 'downloadExport'])
+            ->name('admin.export.download');
         Route::post('/admin/approve-payment/{pembayaran}', [AdminDashboardController::class, 'approvePayment'])
             ->name('admin.approve-payment');
     });
