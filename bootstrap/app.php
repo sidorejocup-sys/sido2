@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Ensure CSRF protection on web routes
-        $middleware->web(\Illuminate\Session\Middleware\EncryptCookies::class);
+        $middleware->web(\Illuminate\Cookie\Middleware\EncryptCookies::class);
         $middleware->web(\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class);
         $middleware->web(\Illuminate\Session\Middleware\StartSession::class);
         $middleware->web(\Illuminate\View\Middleware\ShareErrorsFromSession::class);
