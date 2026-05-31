@@ -69,6 +69,13 @@ Route::middleware('auth')->group(function () {
             ->name('admin.approve-payment');
     });
 
+    Route::middleware('role:super_admin,kades,kasun_rw,rt')->group(function () {
+        Route::get('/village/payments', [VillageDashboardController::class, 'payments'])
+            ->name('village.payments');
+        Route::post('/village/payments/batch', [PembayaranController::class, 'batchStore'])
+            ->name('village.payments.batch');
+    });
+
     Route::get('/api/search', [\App\Http\Controllers\SearchController::class, 'search'])
         ->name('api.search');
 

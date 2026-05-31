@@ -49,6 +49,12 @@
                         </svg>
                         Export Report
                     </a>
+                    <a href="{{ route('village.payments') }}" class="nav-link">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m0 0l-3-3m3 3l3-3M4 12a8 8 0 1016 0 8 8 0 00-16 0z" />
+                        </svg>
+                        Collective Payments
+                    </a>
                 @elseif(in_array(auth()->user()->role, ['kades', 'kasun_rw', 'rt']))
                     <a href="{{ route('village.dashboard') }}" class="nav-link {{ request()->routeIs('village.dashboard') ? 'active' : '' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

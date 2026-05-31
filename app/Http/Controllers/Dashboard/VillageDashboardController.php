@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Sppt;
 use App\Models\Pembayaran;
+use App\Models\SubjekPajak;
 use Illuminate\Http\Request;
 
 class VillageDashboardController extends Controller
@@ -53,24 +54,53 @@ class VillageDashboardController extends Controller
     {
         $this->authorize('view-scoped-payments');
 
-        $rt = auth()->user()->rt ?? null;
-        $rw = auth()->user()->rw ?? null;
+        $search = $request->query('search', '');
+        $rtFilter = $request->query('rt', '');
+        $rwFilter = $request->query('rw', '');
 
-        $paymentsQuery = Pembayaran::query();
+        $spptQuery = Sppt::with(['objekPajak.subjekPajak'])
+            ->where('status_bayar', 'piutang');
 
-        if ($rt) {
-            $paymentsQuery->whereHas('sppt.objekPajak.subjekPajak', function ($q) {
-                $q->where('RT', $rt);
+        if (auth()->user()->role === 'rt') {
+            $spptQuery->whereHas('objekPajak.subjekPajak', function ($q) {
+                $q->where('RT', auth()->user()->rt);
             });
-        } elseif ($rw) {
-            $paymentsQuery->whereHas('sppt.objekPajak.subjekPajak', function ($q) {
-                $q->where('RW', $rw);
+            $rtFilter = auth()->user()->rt;
+        } elseif (auth()->user()->role === 'kasun_rw') {
+            $spptQuery->whereHas('objekPajak.subjekPajak', function ($q) {
+                $q->where('RW', auth()->user()->rw);
+            });
+            $rwFilter = auth()->user()->rw;
+        } else {
+            if ($rtFilter) {
+                $spptQuery->whereHas('objekPajak.subjekPajak', function ($q) use ($rtFilter) {
+                    $q->where('RT', $rtFilter);
+                });
+            }
+            if ($rwFilter) {
+                $spptQuery->whereHas('objekPajak.subjekPajak', function ($q) use ($rwFilter) {
+                    $q->where('RW', $rwFilter);
+                });
+            }
+        }
+
+        if ($search) {
+            $spptQuery->where(function ($q) use ($search) {
+                $q->whereHas('objekPajak.subjekPajak', function ($query) use ($search) {
+                    $query->where('NIK', 'like', "%{$search}%")
+                        ->orWhere('nama', 'like', "%{$search}%");
+                })->orWhere('nop', 'like', "%{$search}%");
             });
         }
 
-        $payments = $paymentsQuery->paginate(20);
+        $sppts = $spptQuery->orderByDesc('created_at')
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('village.payments', compact('payments'));
+        $rtOptions = SubjekPajak::distinct()->orderBy('RT')->pluck('RT');
+        $rwOptions = SubjekPajak::distinct()->orderBy('RW')->pluck('RW');
+
+        return view('village.payments', compact('sppts', 'search', 'rtFilter', 'rwFilter', 'rtOptions', 'rwOptions'));
     }
 
     /**

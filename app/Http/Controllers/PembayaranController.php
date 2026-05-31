@@ -72,6 +72,62 @@ class PembayaranController extends Controller
         }
     }
 
+    public function batchStore(Request $request)
+    {
+        $this->authorize('view-scoped-payments');
+
+        $validated = $request->validate([
+            'selected_sppt_ids' => 'required|string',
+        ]);
+
+        $selectedIds = array_values(array_unique(array_filter(array_map('intval', explode(',', $validated['selected_sppt_ids'])))));
+
+        if (empty($selectedIds)) {
+            return back()->withErrors(['selected_sppt_ids' => 'Pilih setidaknya satu tagihan untuk diproses.']);
+        }
+
+        try {
+            $payments = TransactionService::execute(function () use ($selectedIds) {
+                $sppts = Sppt::whereIn('id_sppt', $selectedIds)
+                    ->where('status_bayar', 'piutang')
+                    ->lockForUpdate()
+                    ->get();
+
+                if ($sppts->count() !== count($selectedIds)) {
+                    throw new \Exception('Beberapa SPPT tidak lagi dapat diproses atau sudah dibayar.');
+                }
+
+                $result = [];
+                foreach ($sppts as $sppt) {
+                    $payment = Pembayaran::create([
+                        'id_sppt' => $sppt->id_sppt,
+                        'tgl_bayar' => now(),
+                        'jumlah_bayar' => $sppt->pajak_terhutang,
+                        'id_petugas' => auth()->id(),
+                    ]);
+
+                    $sppt->update(['status_bayar' => 'lunas']);
+                    $result[] = $payment;
+                }
+
+                return $result;
+            });
+
+            $this->logDatabaseOperation('create', 'PembayaranBatch', [
+                'count' => count($payments),
+                'selected_ids' => $selectedIds,
+            ]);
+
+            return back()->with('success', 'Batch pembayaran berhasil diproses untuk ' . count($payments) . ' tagihan.');
+        } catch (\Exception $e) {
+            $this->logError('Failed batch pembayaran', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['batch' => 'Gagal memproses batch pembayaran: ' . $e->getMessage()]);
+        }
+    }
+
     /**
      * Update a payment record.
      *
