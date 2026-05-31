@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'login.rate.limit' => \App\Http\Middleware\LoginRateLimitMiddleware::class,
             'api.rate.limit' => \App\Http\Middleware\ApiRateLimitMiddleware::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
         // Ensure CSRF protection on web routes

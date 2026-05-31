@@ -90,3 +90,5 @@ feat: add user profile import from CSV
 
 For more details, see [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
 For architecture and database schema details, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For security policies, see [SECURITY.md](SECURITY.md).
+For role-based access control and authentication, see [RBAC.md](RBAC.md).
